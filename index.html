@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResSGA-Net | Kidney Tumor Detection Research Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --bg-alt: #efe7db;
+      --panel: rgba(255, 250, 242, 0.86);
+      --panel-strong: #fffaf2;
+      --text: #121212;
+      --muted: #62584a;
+      --line: rgba(18, 18, 18, 0.14);
+      --teal: #10b6a3;
+      --coral: #ff6b4a;
+      --cobalt: #2458ff;
+      --gold: #f6b100;
+      --shadow: 0 20px 60px rgba(23, 20, 15, 0.1);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(36, 88, 255, 0.12), transparent 0 26%),
+        radial-gradient(circle at 88% 22%, rgba(255, 107, 74, 0.12), transparent 0 22%),
+        radial-gradient(circle at 50% 82%, rgba(16, 182, 163, 0.12), transparent 0 26%),
+        linear-gradient(180deg, var(--bg) 0%, #f4ede1 48%, #efe5d7 100%);
+      color: var(--text);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(18, 18, 18, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18, 18, 18, 0.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .shell {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .shape {
+      position: fixed;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    .shape-a {
+      top: 6.5rem;
+      left: -4rem;
+      width: 12rem;
+      height: 12rem;
+      background: var(--coral);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      transform: rotate(22deg);
+    }
+
+    .shape-b {
+      top: 18rem;
+      right: -3.5rem;
+      width: 14rem;
+      height: 14rem;
+      border-radius: 50%;
+      background: rgba(36, 88, 255, 0.88);
+    }
+
+    .shape-c {
+      bottom: 6rem;
+      left: 12%;
+      width: 10rem;
+      height: 10rem;
+      background: var(--gold);
+      clip-path: polygon(0 100%, 100% 100%, 100% 0);
+      transform: rotate(-10deg);
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+      background: rgba(246, 241, 232, 0.78);
+      border-bottom: 1px solid rgba(18, 18, 18, 0.09);
+    }
+
+    .nav-inner {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+
+    .nav-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .nav-mark {
+      width: 1rem;
+      height: 1rem;
+      background: linear-gradient(135deg, var(--cobalt), var(--teal));
+      transform: rotate(45deg);
+      border-radius: 0.15rem;
+      box-shadow: 6px 6px 0 var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      padding: 5rem 0 3rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+      gap: 2rem;
+      align-items: stretch;
+    }
+
+    .hero-copy,
+    .hero-panel,
+    .panel,
+    .metric-card,
+    .pipeline-step,
+    .contributor-card,
+    .cta-band {
+      background: var(--panel);
+      border: 1px solid rgba(18, 18, 18, 0.09);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-copy {
+      border-radius: 40px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-copy::before {
+      content: "";
+      position: absolute;
+      inset: auto -3.5rem -3.5rem auto;
+      width: 11rem;
+      height: 11rem;
+      border-radius: 50%;
+      background: rgba(16, 182, 163, 0.14);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(18, 18, 18, 0.08);
+      font-family: "Space Mono", monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 0.7rem;
+      height: 0.7rem;
+      background: var(--coral);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+
+    h1 {
+      margin-top: 1.4rem;
+      max-width: 12ch;
+      font-size: clamp(3rem, 7vw, 6.3rem);
+      line-height: 0.93;
+      letter-spacing: -0.06em;
+    }
+
+    .tone {
+      color: var(--cobalt);
+    }
+
+    .hero-sub {
+      max-width: 60ch;
+      margin-top: 1.4rem;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 1.6rem;
+    }
+
+    .meta-chip {
+      padding: 0.7rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(18, 18, 18, 0.08);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.3rem;
+      padding: 0.9rem 1.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(18, 18, 18, 0.12);
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 28px rgba(18, 18, 18, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: #fff9f2;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--text);
+    }
+
+    .hero-panel {
+      border-radius: 32px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+
+    .mini-label {
+      font-family: "Space Mono", monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .chart-surface {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 28px;
+      background:
+        linear-gradient(rgba(18, 18, 18, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18, 18, 18, 0.07) 1px, transparent 1px),
+        linear-gradient(135deg, rgba(36, 88, 255, 0.14), rgba(255, 107, 74, 0.1));
+      background-size: 40px 40px, 40px 40px, auto;
+      overflow: hidden;
+      border: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .chart-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1rem;
+      margin-top: 0.9rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .legend-dot {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 999px;
+    }
+
+    .panel-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .panel-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .panel-item strong {
+      display: block;
+      font-size: 0.92rem;
+    }
+
+    .panel-item span {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .score {
+      font-family: "Space Mono", monospace;
+      font-size: 0.92rem;
+      color: var(--cobalt);
+    }
+
+    section {
+      padding: 1.4rem 0 0;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-kicker {
+      font-family: "Space Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-size: 0.75rem;
+      padding-top: 0.55rem;
+    }
+
+    .section-head h2 {
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      margin-bottom: 0.7rem;
+    }
+
+    .section-head p {
+      max-width: 65ch;
+      color: var(--muted);
+    }
+
+    .panel {
+      border-radius: var(--radius-lg);
+      padding: 1.6rem;
+    }
+
+    .abstract-grid,
+    .results-grid,
+    .detail-grid,
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+
+    .abstract-copy p,
+    .cta-copy p,
+    .panel-copy {
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .abstract-copy p + p {
+      margin-top: 1rem;
+    }
+
+    .highlight-grid,
+    .config-grid,
+    .efficiency-grid,
+    .impact-points {
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 1.2rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .highlight-card,
+    .config-card,
+    .efficiency-card,
+    .impact-card {
+      padding: 1rem;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .highlight-card strong,
+    .impact-card strong {
+      display: block;
+      font-size: 0.96rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .highlight-card span,
+    .impact-card span,
+    .config-card span,
+    .efficiency-card span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .config-card strong,
+    .efficiency-card strong {
+      display: block;
+      font-family: "Space Mono", monospace;
+      font-size: 1.05rem;
+      color: var(--cobalt);
+      margin-bottom: 0.25rem;
+    }
+
+    .bar-block + .bar-block {
+      margin-top: 1.3rem;
+    }
+
+    .bar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .bar-head span:last-child {
+      color: var(--muted);
+      font-family: "Space Mono", monospace;
+      font-size: 0.8rem;
+    }
+
+    .stack-bar {
+      margin-top: 0.55rem;
+      height: 1rem;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      background: rgba(18, 18, 18, 0.08);
+    }
+
+    .seg {
+      height: 100%;
+    }
+
+    .seg-train {
+      width: 70%;
+      background: var(--cobalt);
+    }
+
+    .seg-val {
+      width: 15%;
+      background: var(--teal);
+    }
+
+    .seg-test {
+      width: 15%;
+      background: var(--coral);
+    }
+
+    .seg-normal,
+    .seg-benign,
+    .seg-malignant {
+      width: 33.333%;
+    }
+
+    .seg-normal {
+      background: var(--cobalt);
+    }
+
+    .seg-benign {
+      background: var(--gold);
+    }
+
+    .seg-malignant {
+      background: var(--coral);
+    }
+
+    .bar-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .bar-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .square {
+      width: 0.78rem;
+      height: 0.78rem;
+      border-radius: 0.2rem;
+    }
+
+    .summary-strip {
+      margin-top: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .summary-strip div {
+      padding: 0.9rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .summary-strip strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-strip span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .pipeline-step {
+      border-radius: 24px;
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pipeline-step::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4rem;
+      height: 4rem;
+      background: rgba(36, 88, 255, 0.08);
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+    }
+
+    .step-no {
+      font-family: "Space Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pipeline-step h3 {
+      margin-top: 0.65rem;
+      font-size: 1.02rem;
+    }
+
+    .pipeline-step p {
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .ablation-list {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .ablation-row {
+      display: grid;
+      grid-template-columns: 145px minmax(0, 1fr) 62px;
+      gap: 0.85rem;
+      align-items: center;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .ablation-track {
+      height: 0.9rem;
+      background: rgba(18, 18, 18, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .ablation-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cobalt), var(--teal));
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .metric-card {
+      border-radius: 24px;
+      padding: 1.2rem;
+    }
+
+    .metric-card .value {
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--cobalt);
+    }
+
+    .metric-card .label {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .mini-note {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .heatmap {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 90px repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    .axis-cell,
+    .heat-cell {
+      padding: 0.95rem 0.7rem;
+      border-radius: 18px;
+      text-align: center;
+      border: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .axis-cell {
+      background: rgba(255, 255, 255, 0.54);
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: "Space Mono", monospace;
+    }
+
+    .heat-cell {
+      display: grid;
+      gap: 0.25rem;
+      place-items: center;
+      font-family: "Space Mono", monospace;
+    }
+
+    .heat-cell strong {
+      font-size: 1.15rem;
+      color: var(--text);
+    }
+
+    .heat-cell span {
+      font-size: 0.72rem;
+      color: rgba(18, 18, 18, 0.7);
+    }
+
+    .tone-high {
+      background: rgba(36, 88, 255, 0.22);
+    }
+
+    .tone-mid {
+      background: rgba(16, 182, 163, 0.22);
+    }
+
+    .tone-low {
+      background: rgba(255, 177, 0, 0.24);
+    }
+
+    .tone-error {
+      background: rgba(255, 107, 74, 0.22);
+    }
+
+    .deploy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.15rem;
+    }
+
+    .deploy-table th,
+    .deploy-table td {
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(18, 18, 18, 0.09);
+      text-align: left;
+    }
+
+    .deploy-table th {
+      font-family: "Space Mono", monospace;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .deploy-table td:last-child,
+    .deploy-table th:last-child {
+      text-align: right;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: grid;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .feature-list li {
+      position: relative;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .feature-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      background: var(--coral);
+      transform: rotate(45deg);
+      border-radius: 0.1rem;
+    }
+
+    .contributors-panel {
+      padding: 1.4rem;
+      border-radius: 28px;
+    }
+
+    .contributors-grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .contributor-card {
+      border-radius: 20px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .contributor-avatar {
+      width: 2.8rem;
+      height: 2.8rem;
+      display: grid;
+      place-items: center;
+      border-radius: 0.9rem;
+      background: linear-gradient(135deg, var(--cobalt), var(--coral));
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex: 0 0 auto;
+      box-shadow: 8px 8px 0 rgba(246, 177, 0, 0.28);
+    }
+
+    .contributor-copy h3 {
+      font-size: 0.96rem;
+    }
+
+    .contributor-copy p {
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .cta-band {
+      border-radius: 36px;
+      margin: 3rem 0 4rem;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1.5rem;
+      align-items: center;
+      background:
+        linear-gradient(135deg, rgba(255, 250, 242, 0.92), rgba(255, 247, 235, 0.82)),
+        linear-gradient(90deg, rgba(36, 88, 255, 0.16), rgba(255, 107, 74, 0.16));
+    }
+
+    footer {
+      padding: 0 0 2.5rem;
+    }
+
+    .footer-line {
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(18, 18, 18, 0.09);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .abstract-grid,
+      .results-grid,
+      .detail-grid,
+      .impact-grid,
+      .cta-band,
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .highlight-grid,
+      .config-grid,
+      .summary-strip,
+      .efficiency-grid,
+      .impact-points,
+      .contributors-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shape {
+        display: none;
+      }
+
+      .nav-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        gap: 0.8rem 1rem;
+      }
+
+      .hero {
+        padding-top: 3.8rem;
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .panel,
+      .cta-band {
+        padding: 1.25rem;
+      }
+
+      .pipeline-grid,
+      .highlight-grid,
+      .config-grid,
+      .summary-strip,
+      .efficiency-grid,
+      .impact-points,
+      .contributors-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .heatmap {
+        grid-template-columns: 72px repeat(3, minmax(0, 1fr));
+      }
+
+      .ablation-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shape shape-a"></div>
+  <div class="shape shape-b"></div>
+  <div class="shape shape-c"></div>
+
+  <div class="page">
+    <nav>
+      <div class="nav-inner">
+        <a class="nav-logo" href="#top">
+          <span class="nav-mark"></span>
+          <span>ResSGA-Net</span>
+        </a>
+        <div class="nav-links">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#evaluation">Evaluation</a>
+          <a href="#impact">Impact</a>
+          <a href="#contributors">Team</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="top" class="shell">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <div class="eyebrow">Hybrid Kidney CT Classification Research</div>
+            <h1>Kidney Tumor Detection with a <span class="tone">More Trustworthy Signal.</span></h1>
+            <p class="hero-sub">
+              ResSGA-Net combines residual learning, gated attention, and transformer-based context modeling to classify kidney CT scans into normal, benign, and malignant outcomes with strong accuracy, low latency, and stable behavior under difficult imaging conditions.
+            </p>
+            <div class="hero-meta">
+              <div class="meta-chip">12,000 balanced CT images</div>
+              <div class="meta-chip">3 diagnostic classes</div>
+              <div class="meta-chip">5-fold validation</div>
+              <div class="meta-chip">0.018 s per image</div>
+            </div>
+            <div class="hero-ctas">
+              <a class="btn btn-primary" href="#evaluation">View Results</a>
+              <a class="btn btn-secondary" href="#method">Explore Method</a>
+            </div>
+          </div>
+
+          <aside class="hero-panel reveal">
+            <div>
+              <div class="mini-label">Performance Snapshot</div>
+              <div class="chart-surface">
+                <svg class="chart-svg" viewBox="0 0 420 290" role="img" aria-label="Bar chart of Accuracy, Precision, Recall and F1 score with AUC annotation">
+                  <rect x="38" y="24" width="344" height="214" rx="20" fill="rgba(255,250,242,0.56)" stroke="rgba(18,18,18,0.08)" />
+                  <line x1="64" y1="220" x2="364" y2="220" stroke="rgba(18,18,18,0.22)" stroke-width="2" />
+                  <line x1="64" y1="58" x2="64" y2="220" stroke="rgba(18,18,18,0.16)" stroke-width="2" />
+                  <g font-family="Space Mono, monospace" font-size="11" fill="rgba(18,18,18,0.58)">
+                    <text x="48" y="222">0</text>
+                    <text x="38" y="182">25</text>
+                    <text x="38" y="142">50</text>
+                    <text x="38" y="102">75</text>
+                    <text x="30" y="62">100</text>
+                  </g>
+                  <rect x="96" y="66" width="40" height="154" rx="12" fill="#2458ff" />
+                  <rect x="168" y="67" width="40" height="153" rx="12" fill="#10b6a3" />
+                  <rect x="240" y="63" width="40" height="157" rx="12" fill="#ff6b4a" />
+                  <rect x="312" y="66" width="40" height="154" rx="12" fill="#f6b100" />
+                  <g font-family="Space Mono, monospace" font-size="11" font-weight="700">
+                    <text x="102" y="56" fill="#2458ff">98.03</text>
+                    <text x="174" y="57" fill="#10b6a3">97.81</text>
+                    <text x="246" y="53" fill="#ff6b4a">98.27</text>
+                    <text x="319" y="56" fill="#c28600">98.04</text>
+                  </g>
+                  <g font-family="Space Mono, monospace" font-size="11" fill="rgba(18,18,18,0.68)">
+                    <text x="93" y="245">Accuracy</text>
+                    <text x="165" y="245">Precision</text>
+                    <text x="245" y="245">Recall</text>
+                    <text x="325" y="245">F1</text>
+                  </g>
+                  <rect x="266" y="28" width="98" height="30" rx="15" fill="rgba(255,255,255,0.82)" />
+                  <text x="280" y="47" font-family="Space Mono, monospace" font-size="12" fill="#121212">AUC 0.994</text>
+                </svg>
+                <div class="legend">
+                  <span><i class="legend-dot" style="background:#2458ff;"></i>Overall accuracy</span>
+                  <span><i class="legend-dot" style="background:#10b6a3;"></i>Precision control</span>
+                  <span><i class="legend-dot" style="background:#ff6b4a;"></i>Tumor recall</span>
+                  <span><i class="legend-dot" style="background:#f6b100;"></i>Balanced F1</span>
+                </div>
+              </div>
+            </div>
+            <div class="panel-list">
+              <div class="panel-item">
+                <div>
+                  <strong>Accuracy</strong>
+                  <span>Three-class CT classification</span>
+                </div>
+                <div class="score">98.03%</div>
+              </div>
+              <div class="panel-item">
+                <div>
+                  <strong>External Set</strong>
+                  <span>Generalization on unseen data</span>
+                </div>
+                <div class="score">96.88%</div>
+              </div>
+              <div class="panel-item">
+                <div>
+                  <strong>Cross-validation</strong>
+                  <span>Mean accuracy across five folds</span>
+                </div>
+                <div class="score">97.93%</div>
+              </div>
+              <div class="panel-item">
+                <div>
+                  <strong>Inference</strong>
+                  <span>Average prediction latency</span>
+                </div>
+                <div class="score">18 ms</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="overview">
+        <div class="section-head reveal">
+          <div class="section-kicker">Overview</div>
+          <div>
+            <h2>A research page that explains the model, the data, and why the numbers matter.</h2>
+            <p>
+              The original paper frames ResSGA-Net as a clinical support system rather than a replacement for radiologists. This version keeps that tone, but makes the project easier to understand for portfolio, demo, and GitHub presentation.
+            </p>
+          </div>
+        </div>
+
+        <div class="abstract-grid">
+          <article class="panel abstract-copy reveal">
+            <p>
+              Kidney tumors are difficult to assess at scale because subtle visual cues can be easy to miss under heavy workload. ResSGA-Net addresses that challenge by pairing strong convolutional feature extraction with attention-guided focus and transformer-based global context.
+            </p>
+            <p>
+              In the paper, the model is evaluated on balanced kidney CT imagery covering normal, benign, and malignant classes. The hybrid design is meant to preserve fine local structure, highlight suspicious regions, and maintain broader anatomical context before classification.
+            </p>
+            <div class="highlight-grid">
+              <div class="highlight-card">
+                <strong>Clinical objective</strong>
+                <span>Reduce missed tumor signals while keeping false alarms low enough for practical decision support.</span>
+              </div>
+              <div class="highlight-card">
+                <strong>Core idea</strong>
+                <span>Fuse residual learning, gated attention, and Swin-style context modeling in one pipeline.</span>
+              </div>
+              <div class="highlight-card">
+                <strong>Target outputs</strong>
+                <span>Normal, benign, and malignant CT classifications with high sensitivity and strong separation.</span>
+              </div>
+              <div class="highlight-card">
+                <strong>Validation style</strong>
+                <span>Test split evaluation, 5-fold validation, baseline comparison, and robustness checks under distortion.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel reveal">
+            <div class="mini-label">Dataset and Evaluation Design</div>
+            <div class="bar-block">
+              <div class="bar-head">
+                <strong>Data split</strong>
+                <span>12,000 total CT images</span>
+              </div>
+              <div class="stack-bar">
+                <div class="seg seg-train"></div>
+                <div class="seg seg-val"></div>
+                <div class="seg seg-test"></div>
+              </div>
+              <div class="bar-legend">
+                <span><i class="square" style="background:#2458ff;"></i>Train 70% (8,400)</span>
+                <span><i class="square" style="background:#10b6a3;"></i>Validation 15% (1,800)</span>
+                <span><i class="square" style="background:#ff6b4a;"></i>Test 15% (1,800)</span>
+              </div>
+            </div>
+            <div class="bar-block">
+              <div class="bar-head">
+                <strong>Class balance</strong>
+                <span>Equal representation</span>
+              </div>
+              <div class="stack-bar">
+                <div class="seg seg-normal"></div>
+                <div class="seg seg-benign"></div>
+                <div class="seg seg-malignant"></div>
+              </div>
+              <div class="bar-legend">
+                <span><i class="square" style="background:#2458ff;"></i>Normal 4,000</span>
+                <span><i class="square" style="background:#f6b100;"></i>Benign 4,000</span>
+                <span><i class="square" style="background:#ff6b4a;"></i>Malignant 4,000</span>
+              </div>
+            </div>
+            <div class="summary-strip">
+              <div>
+                <strong>224 x 224</strong>
+                <span>Input resolution after resizing</span>
+              </div>
+              <div>
+                <strong>Min-max</strong>
+                <span>Normalization before training</span>
+              </div>
+              <div>
+                <strong>Augmented</strong>
+                <span>Rotation, flipping, zooming, contrast shifts</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="method">
+        <div class="section-head reveal">
+          <div class="section-kicker">Method</div>
+          <div>
+            <h2>A six-part pipeline designed for stable features, focused regions, and wider context.</h2>
+            <p>
+              The model architecture is strongest when read as a sequence: clean the image, extract durable features, suppress irrelevant background, capture long-range structure, fuse signals, then classify with a final decision layer.
+            </p>
+          </div>
+        </div>
+
+        <div class="pipeline-grid">
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 01</div>
+            <h3>Acquisition</h3>
+            <p>Curate balanced kidney CT images spanning normal, benign, and malignant outcomes.</p>
+          </article>
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 02</div>
+            <h3>Preprocessing</h3>
+            <p>Resize, normalize, reduce noise, and augment to improve training stability and generalization.</p>
+          </article>
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 03</div>
+            <h3>ResNet50</h3>
+            <p>Use residual learning to preserve gradient flow and learn both low-level texture and deep semantics.</p>
+          </article>
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 04</div>
+            <h3>Gated Attention</h3>
+            <p>Emphasize likely tumor regions while suppressing background structures that add noise.</p>
+          </article>
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 05</div>
+            <h3>Swin Context</h3>
+            <p>Capture broader spatial relationships that matter for margins, shape, and surrounding anatomy.</p>
+          </article>
+          <article class="pipeline-step reveal">
+            <div class="step-no">Stage 06</div>
+            <h3>Classification</h3>
+            <p>Fuse the learned representation and map it to the final diagnostic class probabilities.</p>
+          </article>
+        </div>
+
+        <div class="detail-grid" style="margin-top:1.2rem;">
+          <article class="panel reveal">
+            <div class="mini-label">Training Configuration</div>
+            <p class="panel-copy">The paper reports a compact but credible training setup with early stopping and regularization instead of heavy tuning theatrics.</p>
+            <div class="config-grid">
+              <div class="config-card">
+                <strong>Adam</strong>
+                <span>Optimizer</span>
+              </div>
+              <div class="config-card">
+                <strong>1e-4</strong>
+                <span>Learning rate</span>
+              </div>
+              <div class="config-card">
+                <strong>32</strong>
+                <span>Batch size</span>
+              </div>
+              <div class="config-card">
+                <strong>50</strong>
+                <span>Epoch budget</span>
+              </div>
+              <div class="config-card">
+                <strong>0.5</strong>
+                <span>Dropout</span>
+              </div>
+              <div class="config-card">
+                <strong>Early stop</strong>
+                <span>Validation-monitored regularization</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel reveal">
+            <div class="mini-label">Ablation Evidence</div>
+            <p class="panel-copy">The hybrid design is supported by reported component drop tests, which is more convincing than claiming the architecture works by intuition alone.</p>
+            <div class="ablation-list">
+              <div class="ablation-row">
+                <span>ResSGA-Net</span>
+                <div class="ablation-track"><div class="ablation-fill" style="width:98.03%;"></div></div>
+                <strong>98.03%</strong>
+              </div>
+              <div class="ablation-row">
+                <span>Without attention</span>
+                <div class="ablation-track"><div class="ablation-fill" style="width:95.89%; background:linear-gradient(90deg,#10b6a3,#f6b100);"></div></div>
+                <strong>95.89%</strong>
+              </div>
+              <div class="ablation-row">
+                <span>Without residuals</span>
+                <div class="ablation-track"><div class="ablation-fill" style="width:94.28%; background:linear-gradient(90deg,#ff6b4a,#f6b100);"></div></div>
+                <strong>94.28%</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="evaluation">
+        <div class="section-head reveal">
+          <div class="section-kicker">Evaluation</div>
+          <div>
+            <h2>High headline accuracy, but also stronger robustness, calibration, and class separation.</h2>
+            <p>
+              The strongest part of the paper is not just the top-line accuracy. It also reports recall, specificity, AUC, robustness under distortion, external validation, and component ablation, which makes the project story more complete.
+            </p>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card reveal">
+            <div class="value">98.03%</div>
+            <div class="label">Accuracy</div>
+            <div class="mini-note">Overall test-set performance</div>
+          </div>
+          <div class="metric-card reveal">
+            <div class="value">97.81%</div>
+            <div class="label">Precision</div>
+            <div class="mini-note">Low false-positive tendency</div>
+          </div>
+          <div class="metric-card reveal">
+            <div class="value">98.27%</div>
+            <div class="label">Recall</div>
+            <div class="mini-note">Strong tumor capture rate</div>
+          </div>
+          <div class="metric-card reveal">
+            <div class="value">97.65%</div>
+            <div class="label">Specificity</div>
+            <div class="mini-note">Healthy cases remain protected</div>
+          </div>
+          <div class="metric-card reveal">
+            <div class="value">98.04%</div>
+            <div class="label">F1 Score</div>
+            <div class="mini-note">Balanced precision-recall behavior</div>
+          </div>
+          <div class="metric-card reveal">
+            <div class="value">0.994</div>
+            <div class="label">AUC</div>
+            <div class="mini-note">Excellent class separation</div>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <article class="panel reveal">
+            <div class="mini-label">Benchmark Comparison</div>
+            <div class="chart-surface">
+              <svg class="chart-svg" viewBox="0 0 560 330" role="img" aria-label="Horizontal bar chart comparing baseline model accuracy values">
+                <rect x="30" y="18" width="500" height="284" rx="22" fill="rgba(255,250,242,0.56)" stroke="rgba(18,18,18,0.08)" />
+                <line x1="166" y1="52" x2="166" y2="272" stroke="rgba(18,18,18,0.15)" stroke-width="2" />
+                <line x1="166" y1="272" x2="498" y2="272" stroke="rgba(18,18,18,0.22)" stroke-width="2" />
+                <g font-family="Space Mono, monospace" font-size="12" fill="rgba(18,18,18,0.68)">
+                  <text x="182" y="292">92</text>
+                  <text x="250" y="292">94</text>
+                  <text x="318" y="292">96</text>
+                  <text x="386" y="292">98</text>
+                </g>
+                <g font-family="Space Mono, monospace" font-size="12" fill="rgba(18,18,18,0.72)">
+                  <text x="48" y="82">CNN</text>
+                  <text x="48" y="114">VGG16</text>
+                  <text x="48" y="146">ResNet50</text>
+                  <text x="48" y="178">DenseNet121</text>
+                  <text x="48" y="210">EfficientNet-B0</text>
+                  <text x="48" y="242">ResSGA-Net</text>
+                </g>
+                <rect x="166" y="66" width="160" height="18" rx="9" fill="rgba(16,182,163,0.34)" />
+                <rect x="166" y="98" width="192" height="18" rx="9" fill="rgba(16,182,163,0.34)" />
+                <rect x="166" y="130" width="252" height="18" rx="9" fill="rgba(16,182,163,0.34)" />
+                <rect x="166" y="162" width="278" height="18" rx="9" fill="rgba(16,182,163,0.34)" />
+                <rect x="166" y="194" width="309" height="18" rx="9" fill="rgba(16,182,163,0.34)" />
+                <rect x="166" y="226" width="330" height="18" rx="9" fill="#2458ff" />
+                <g font-family="Space Mono, monospace" font-size="12" font-weight="700">
+                  <text x="336" y="80" fill="#0d6f64">91.82%</text>
+                  <text x="368" y="112" fill="#0d6f64">93.75%</text>
+                  <text x="428" y="144" fill="#0d6f64">95.94%</text>
+                  <text x="454" y="176" fill="#0d6f64">96.41%</text>
+                  <text x="485" y="208" fill="#0d6f64">96.87%</text>
+                  <text x="500" y="240" text-anchor="end" fill="#2458ff">98.03%</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <article class="panel reveal">
+            <div class="mini-label">Robustness Across Conditions</div>
+            <div class="chart-surface">
+              <svg class="chart-svg" viewBox="0 0 560 330" role="img" aria-label="Line chart of performance under original, gaussian noise, low contrast, rotation and external dataset conditions">
+                <rect x="28" y="18" width="504" height="284" rx="22" fill="rgba(255,250,242,0.56)" stroke="rgba(18,18,18,0.08)" />
+                <line x1="74" y1="62" x2="74" y2="262" stroke="rgba(18,18,18,0.16)" stroke-width="2" />
+                <line x1="74" y1="262" x2="498" y2="262" stroke="rgba(18,18,18,0.22)" stroke-width="2" />
+                <g stroke="rgba(18,18,18,0.1)" stroke-width="1">
+                  <line x1="74" y1="88" x2="498" y2="88" />
+                  <line x1="74" y1="132" x2="498" y2="132" />
+                  <line x1="74" y1="176" x2="498" y2="176" />
+                  <line x1="74" y1="220" x2="498" y2="220" />
+                </g>
+                <g font-family="Space Mono, monospace" font-size="11" fill="rgba(18,18,18,0.58)">
+                  <text x="34" y="266">96</text>
+                  <text x="34" y="222">96.5</text>
+                  <text x="34" y="178">97</text>
+                  <text x="34" y="134">97.5</text>
+                  <text x="34" y="90">98</text>
+                </g>
+                <polyline fill="none" stroke="#ff6b4a" stroke-width="4" points="112,84 204,133 296,175 388,122 480,137" />
+                <g fill="#2458ff" stroke="#fffaf2" stroke-width="4">
+                  <circle cx="112" cy="84" r="7" />
+                  <circle cx="204" cy="133" r="7" />
+                  <circle cx="296" cy="175" r="7" />
+                  <circle cx="388" cy="122" r="7" />
+                  <circle cx="480" cy="137" r="7" />
+                </g>
+                <g font-family="Space Mono, monospace" font-size="11" fill="rgba(18,18,18,0.72)">
+                  <text x="90" y="286">Original</text>
+                  <text x="165" y="302">Gaussian</text>
+                  <text x="272" y="302">Low contrast</text>
+                  <text x="366" y="286">Rotation</text>
+                  <text x="440" y="302">External</text>
+                </g>
+                <g font-family="Space Mono, monospace" font-size="11" font-weight="700">
+                  <text x="94" y="70" fill="#2458ff">98.03</text>
+                  <text x="186" y="120" fill="#2458ff">96.91</text>
+                  <text x="278" y="162" fill="#2458ff">96.44</text>
+                  <text x="370" y="109" fill="#2458ff">97.28</text>
+                  <text x="462" y="124" fill="#2458ff">96.88</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+        </div>
+
+        <div class="results-grid" style="margin-top:1.2rem;">
+          <article class="panel reveal">
+            <div class="mini-label">Confusion Matrix</div>
+            <div class="heatmap">
+              <div class="axis-cell"></div>
+              <div class="axis-cell">Normal</div>
+              <div class="axis-cell">Benign</div>
+              <div class="axis-cell">Malignant</div>
+
+              <div class="axis-cell">Normal</div>
+              <div class="heat-cell tone-high"><strong>1123</strong><span>correct</span></div>
+              <div class="heat-cell tone-error"><strong>14</strong><span>error</span></div>
+              <div class="heat-cell tone-error"><strong>6</strong><span>error</span></div>
+
+              <div class="axis-cell">Benign</div>
+              <div class="heat-cell tone-error"><strong>18</strong><span>error</span></div>
+              <div class="heat-cell tone-mid"><strong>1097</strong><span>correct</span></div>
+              <div class="heat-cell tone-error"><strong>11</strong><span>error</span></div>
+
+              <div class="axis-cell">Malignant</div>
+              <div class="heat-cell tone-error"><strong>5</strong><span>error</span></div>
+              <div class="heat-cell tone-error"><strong>9</strong><span>error</span></div>
+              <div class="heat-cell tone-high"><strong>1117</strong><span>correct</span></div>
+            </div>
+            <p class="panel-copy" style="margin-top:1rem;">
+              Most mistakes cluster around benign versus malignant edge cases rather than widespread confusion across all classes, which is a much better failure profile than random class leakage.
+            </p>
+          </article>
+
+          <article class="panel reveal">
+            <div class="mini-label">Efficiency and Generalization</div>
+            <div class="efficiency-grid">
+              <div class="efficiency-card">
+                <strong>4.3 h</strong>
+                <span>Training time</span>
+              </div>
+              <div class="efficiency-card">
+                <strong>24.6 M</strong>
+                <span>Model parameters</span>
+              </div>
+              <div class="efficiency-card">
+                <strong>0.018 s</strong>
+                <span>Inference time</span>
+              </div>
+              <div class="efficiency-card">
+                <strong>96.88%</strong>
+                <span>External dataset accuracy</span>
+              </div>
+              <div class="efficiency-card">
+                <strong>97.93%</strong>
+                <span>Five-fold mean accuracy</span>
+              </div>
+              <div class="efficiency-card">
+                <strong>0.14%</strong>
+                <span>Cross-validation standard deviation</span>
+              </div>
+            </div>
+
+            <table class="deploy-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Params</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ResNet50</td>
+                  <td>25.6 M</td>
+                  <td>0.021 s</td>
+                </tr>
+                <tr>
+                  <td>DenseNet121</td>
+                  <td>8.0 M</td>
+                  <td>0.019 s</td>
+                </tr>
+                <tr>
+                  <td>EfficientNet-B0</td>
+                  <td>5.3 M</td>
+                  <td>0.017 s</td>
+                </tr>
+                <tr>
+                  <td><strong>ResSGA-Net</strong></td>
+                  <td><strong>24.6 M</strong></td>
+                  <td><strong>0.018 s</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+      </section>
+
+      <section id="impact">
+        <div class="section-head reveal">
+          <div class="section-kicker">Impact</div>
+          <div>
+            <h2>Why the project matters beyond a single accuracy number.</h2>
+            <p>
+              Medical models are judged by how their behavior translates into real diagnostic consequences. Sensitivity, specificity, interpretability, efficiency, and robustness all matter if the system is ever going to support clinical workflows.
+            </p>
+          </div>
+        </div>
+
+        <div class="impact-grid">
+          <article class="panel reveal">
+            <div class="mini-label">Clinical Reading of the Metrics</div>
+            <div class="impact-points">
+              <div class="impact-card">
+                <strong>High sensitivity</strong>
+                <span>Supports early cancer detection by keeping malignant misses lower.</span>
+              </div>
+              <div class="impact-card">
+                <strong>High specificity</strong>
+                <span>Reduces unnecessary follow-up on healthy or lower-risk cases.</span>
+              </div>
+              <div class="impact-card">
+                <strong>Strong AUC</strong>
+                <span>Shows the model separates classes well instead of winning on threshold luck.</span>
+              </div>
+              <div class="impact-card">
+                <strong>Low latency</strong>
+                <span>Fast enough to fit a decision-support setting without becoming workflow drag.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel reveal">
+            <div class="mini-label">Limitations and Next Steps</div>
+            <ul class="feature-list">
+              <li>The current study is limited to 2D CT imagery and does not yet model full 3D tumor volume.</li>
+              <li>Future work can combine CT and MRI to strengthen multimodal understanding in ambiguous cases.</li>
+              <li>Federated evaluation across hospitals would test whether the model remains stable across different scanners and acquisition settings.</li>
+              <li>Interpretability can be extended with Grad-CAM style visual evidence to make predictions easier to review.</li>
+              <li>PACS-side deployment and prospective clinical validation would be the real next step after research benchmarking.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="contributors">
+        <div class="section-head reveal">
+          <div class="section-kicker">Team</div>
+          <div>
+            <h2>A compact credit block that keeps the page focused on the work.</h2>
+            <p>
+              The names remain, but the academic identifiers and oversized team presentation are removed so the project itself stays in the foreground.
+            </p>
+          </div>
+        </div>
+
+        <div class="contributors-panel panel reveal">
+          <div class="mini-label">Project Contributors</div>
+          <div class="contributors-grid">
+            <article class="contributor-card">
+              <div class="contributor-avatar">D</div>
+              <div class="contributor-copy">
+                <h3>Dishan Chakraborty</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+            <article class="contributor-card">
+              <div class="contributor-avatar">A</div>
+              <div class="contributor-copy">
+                <h3>Anshuman Rath</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+            <article class="contributor-card">
+              <div class="contributor-avatar">J</div>
+              <div class="contributor-copy">
+                <h3>John James</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+            <article class="contributor-card">
+              <div class="contributor-avatar">B</div>
+              <div class="contributor-copy">
+                <h3>Bibhas Mahata</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+            <article class="contributor-card">
+              <div class="contributor-avatar">S</div>
+              <div class="contributor-copy">
+                <h3>Sai Krishna Dhal</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+            <article class="contributor-card">
+              <div class="contributor-avatar">A</div>
+              <div class="contributor-copy">
+                <h3>Aarit Hota</h3>
+                <p>Research contributor</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="reveal">
+        <div class="cta-band">
+          <div class="cta-copy">
+            <div class="mini-label">Next Step</div>
+            <h2 style="font-size:clamp(1.8rem,3.4vw,3rem);line-height:1;letter-spacing:-0.04em;margin:0.5rem 0 0.8rem;">A GitHub-ready research landing page with cleaner story, real charts, and stronger project depth.</h2>
+            <p>
+              This version keeps the original visual character, removes the academic clutter, and makes the page much easier to use as a portfolio or repository front page.
+            </p>
+          </div>
+          <div class="hero-ctas" style="margin-top:0;">
+            <a class="btn btn-primary" href="#top">Back to Top</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footer-line">
+          <p>ResSGA-Net research showcase for kidney CT tumor classification</p>
+          <p>Single-file static page ready for GitHub Pages</p>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const reveals = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+
+    reveals.forEach((item) => observer.observe(item));
+  </script>
+</body>
+</html>
